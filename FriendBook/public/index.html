@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FriendBook - Social Network</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div id="app">
+        
+        <div id="auth-screen" class="screen active">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1>FriendBook</h1>
+                    <p>Connect with friends and share your moments</p>
+                </div>
+                
+                <div class="auth-tabs">
+                    <button class="tab-btn active" onclick="showLogin()">Login</button>
+                    <button class="tab-btn" onclick="showRegister()">Register</button>
+                </div>
+                
+                <div id="login-form" class="auth-form active">
+                    <input type="text" id="login-username" placeholder="Username" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button onclick="login()">Login</button>
+                </div>
+                
+                <div id="register-form" class="auth-form">
+                    <input type="text" id="reg-username" placeholder="Username" required>
+                    <input type="text" id="reg-firstname" placeholder="First Name" required>
+                    <input type="text" id="reg-lastname" placeholder="Last Name" required>
+                    <input type="password" id="reg-password" placeholder="Password" required>
+                    <button onclick="register()">Register</button>
+                </div>
+                
+                <div id="auth-message" class="message"></div>
+                
+
+            </div>
+        </div>
+
+        
+        <div id="main-screen" class="screen">
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <h2>FriendBook</h2>
+                </div>
+
+                <div class="nav-user">
+                    <span id="user-name"></span>
+                    <button onclick="showChangePasswordModal()" class="nav-icon-btn" title="Change Password">
+                        <span class="icon">🔐</span>
+                    </button>
+                    <button onclick="logout()" class="logout-btn">Logout</button>
+                </div>
+            </nav>
+
+            <div class="main-content">
+                <aside class="sidebar">
+                    <div class="sidebar-menu">
+                        <button class="menu-btn active" onclick="showSection('dashboard')">
+                            <span class="icon">🏠</span> Dashboard
+                        </button>
+                        <button class="menu-btn" onclick="showSection('friends')">
+                            <span class="icon">👥</span> Friends
+                        </button>
+                        <button class="menu-btn" onclick="showSection('requests')">
+                            <span class="icon">📬</span> Requests <span id="request-count" class="badge">0</span>
+                        </button>
+                        <button class="menu-btn" onclick="showSection('suggestions')">
+                            <span class="icon">💡</span> Suggestions
+                        </button>
+                        <button class="menu-btn" onclick="showSection('chat-list')">
+                            <span class="icon">💬</span> Chat <span id="message-count" class="badge" style="display: none; background: var(--danger);">0</span>
+                        </button>
+                        <a href="/admin" class="menu-btn" id="admin-panel-btn" style="display: none; color: var(--accent);">
+                            <span class="icon">⚡</span> Admin Panel
+                        </a>
+                    </div>
+                </aside>
+
+                <main class="content">
+                    
+                    <section id="dashboard-section" class="content-section active">
+                        <div class="section-header">
+                            <h2>Dashboard</h2>
+                            <p>Welcome to your social network!</p>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-friends">0</div>
+                                <div class="stat-label">Friends</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-requests">0</div>
+                                <div class="stat-label">Pending Requests</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-suggestions">0</div>
+                                <div class="stat-label">Suggestions</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-sent">0</div>
+                                <div class="stat-label">Sent Requests</div>
+                            </div>
+                        </div>
+                        
+                        <div class="recent-activity">
+                            <h3>Recent Activity</h3>
+                            <div id="activity-feed" class="activity-list">
+                                <p class="no-activity">No recent activity</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    
+                    <section id="friends-section" class="content-section">
+                        <div class="section-header">
+                            <h2>My Friends</h2>
+                            <button onclick="refreshFriends()" class="refresh-btn">Refresh</button>
+                        </div>
+                        <div id="friends-list" class="user-grid">
+                            <p class="no-data">No friends yet. Send some friend requests!</p>
+                        </div>
+                    </section>
+
+                    <section id="chat-list-section" class="content-section">
+                        <div class="section-header">
+                            <h2>Messages</h2>
+                            <button onclick="refreshChatList()" class="refresh-btn">Refresh</button>
+                        </div>
+                        <div id="chat-list" class="user-grid">
+                            <p class="no-data">Loading chats...</p>
+                        </div>
+                    </section>
+                    
+                    <section id="requests-section" class="content-section">
+                        <div class="section-header">
+                            <h2>Friend Requests</h2>
+                            <div class="request-actions">
+                                <input type="text" id="request-username" placeholder="Enter username">
+                                <button onclick="sendFriendRequest()" class="send-btn">Send Request</button>
+                            </div>
+                        </div>
+                        <div id="requests-list" class="user-grid">
+                            <p class="no-data">No pending requests</p>
+                        </div>
+                    </section>
+                    
+                    <section id="suggestions-section" class="content-section">
+                        <div class="section-header">
+                            <h2>Friend Suggestions</h2>
+                            <button onclick="refreshSuggestions()" class="refresh-btn">Refresh</button>
+                        </div>
+                        <div id="suggestions-list" class="user-grid">
+                            <p class="no-data">No suggestions available</p>
+                        </div>
+                    </section>
+                    
+                    <section id="users-section" class="content-section">
+                        <div class="section-header">
+                            <h2>All Users</h2>
+                            <div class="admin-controls">
+                                <button onclick="showAddUserForm()" class="add-btn">Add User</button>
+                                <button onclick="clearDatabase()" class="clear-btn">Clear Database</button>
+                                <button onclick="refreshAllUsers()" class="refresh-btn">Refresh</button>
+                            </div>
+                        </div>
+                        <div id="all-users-list" class="user-grid">
+                            <p class="no-data">Loading users...</p>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="chat-modal" class="modal" style="display: none;">
+        <div class="modal-content glass chat-container">
+            <div class="chat-header">
+                <div class="chat-user-info">
+                    <div id="chat-avatar" class="user-avatar small"></div>
+                    <h3 id="chat-username">User</h3>
+                </div>
+                <span class="close" onclick="closeChat()">&times;</span>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="chat-input-area">
+                <div class="media-menu-container">
+                    <button onclick="toggleMediaMenu()" class="attach-btn icon-btn" id="media-menu-btn">＋</button>
+                    <div id="media-menu" class="media-menu">
+                        <button onclick="triggerFileUpload('image')" class="media-option">
+                            <span class="icon">📷</span> Photo
+                        </button>
+                        <button onclick="triggerFileUpload('video')" class="media-option">
+                            <span class="icon">🎥</span> Video
+                        </button>
+                        <button onclick="triggerFileUpload('file')" class="media-option">
+                            <span class="icon">📄</span> File
+                        </button>
+                    </div>
+                </div>
+                <input type="file" id="chat-file-input" style="display: none;" onchange="handleFileUpload(this)">
+                <input type="text" id="chat-input" placeholder="Type a message..." onkeydown="if(event.key === 'Enter') sendMessage()">
+                <button onclick="sendMessage()" class="send-btn icon-btn">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Form Modal -->
+    <div id="add-user-form" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="hideAddUserForm()">&times;</span>
+            <h2>Add New User</h2>
+            <form id="new-user-form" onsubmit="event.preventDefault(); addUser();">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="text" name="firstName" placeholder="First Name" required>
+                <input type="text" name="lastName" placeholder="Last Name" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <label><input type="checkbox" name="isAdmin"> Admin User</label>
+                <button type="submit">Create User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="modal" style="display: none;">
+        <div class="modal-content glass password-modal">
+            <div class="modal-header">
+                <div class="icon-circle">
+                    <span>🔐</span>
+                </div>
+                <h2>Update Password</h2>
+                <p>Ensure your account stays secure</p>
+                <span class="close-btn" onclick="hideChangePasswordModal()">&times;</span>
+            </div>
+            
+            <form id="change-password-form" onsubmit="event.preventDefault(); changePassword();">
+                <div class="input-group">
+                    <span class="input-icon">🔑</span>
+                    <input type="password" id="cp-current" name="current-password" placeholder="Current Password" autocomplete="current-password" required>
+                </div>
+                
+                <div class="input-group">
+                    <span class="input-icon">✨</span>
+                    <input type="password" id="cp-new" name="new-password" placeholder="New Password (min 6 chars)" autocomplete="new-password" required>
+                </div>
+                
+                <div class="input-group">
+                    <span class="input-icon">✅</span>
+                    <input type="password" id="cp-confirm" name="confirm-password" placeholder="Confirm New Password" autocomplete="new-password" required>
+                </div>
+                
+                <button type="submit" class="primary-btn">Update Password</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
