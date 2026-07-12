@@ -175,16 +175,6 @@ This project is part of an academic Project for **TCS-302: Data Structures in C*
 
 ---
 
-## 👥 Team
-
-**Team ADAPT (DS-III-T005)**
-
-| Name            | Roll Number | Email                        |
-| --------------- | ----------- | ---------------------------- |
-| Anurag Bhowmick | 240211698   | anuragbhowmick1711@gmail.com |
-| Tanishk Gupta   | 240111241   | tanishkg232@gmail.com        |
-| Prajjwal Singh  | 240111017   | prajjwalsingh8705@gmail.com  |
-| Divyanshi Singh | 240221677   | dnshi235@gmail.com           |
 
 <div align="center">
 
